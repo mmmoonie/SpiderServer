@@ -27,12 +27,15 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     socketthread.cpp \
-    tcpserver.cpp
+    tcpserver.cpp \
+    releasemainwindow.cpp
 
 HEADERS += \
         mainwindow.h \
     socketthread.h \
-    tcpserver.h
+    tcpserver.h \
+    releasemainwindow.h
 
 FORMS += \
-        mainwindow.ui
+        mainwindow.ui \
+    releasemainwindow.ui
