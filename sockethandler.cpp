@@ -28,7 +28,7 @@ SocketHandler::SocketHandler(QObject *parent, qintptr socketDescriptor) : QObjec
         errorJson.insert("desc", errorMsg);
         errorJson.insert("data", QJsonValue::Null);
         writeToTcpClient(errorJson);
-        tcpSocket->close();
+//        tcpSocket->close();
         return;
     }
     QString configFilePath = ConfigUtil::APP_SETTINGS_PATH();
@@ -44,7 +44,7 @@ SocketHandler::SocketHandler(QObject *parent, qintptr socketDescriptor) : QObjec
         errorJson.insert("desc", QString(spiderExePath.append(" not exists")));
         errorJson.insert("data", QJsonValue::Null);
         writeToTcpClient(errorJson);
-        tcpSocket->close();
+//        tcpSocket->close();
         return;
     }
     QStringList arguments;
@@ -52,15 +52,25 @@ SocketHandler::SocketHandler(QObject *parent, qintptr socketDescriptor) : QObjec
     qDebug() << spiderExePath << uuid;
     process->start(spiderExePath, arguments);
     process->waitForStarted();
-
+    localServer->waitForNewConnection(10000);
     qDebug() << "process start";
 }
 
 void SocketHandler::on_localServer_newConnection()
 {
     localSocket = localServer->nextPendingConnection();
+//    localSocket->write("124");
+//    localSocket->flush();
     qDebug() << "socket descriptor " << localSocket->socketDescriptor();
-    connect(localSocket, &QLocalSocket::readyRead, this, &SocketHandler::on_localSocket_readyRead);
+//    connect(localSocket, &QLocalSocket::readyRead, this, &SocketHandler::on_localSocket_readyRead);
+    connect(localSocket, &QLocalSocket::readyRead, [=](){
+        QByteArray data = localSocket->readAll();
+        qDebug() << data;
+        emit info(QString(data));
+        qDebug() << tcpSocket->state();
+        tcpSocket->write(data);
+        tcpSocket->flush();
+    });
     connect(localSocket, &QLocalSocket::disconnected, this, &SocketHandler::on_localSocket_disconnected);
 }
 
@@ -74,9 +84,9 @@ void SocketHandler::on_localSocket_readyRead()
 
 void SocketHandler::on_localSocket_disconnected()
 {
-    localSocket->close();
-    localServer->close();
-    tcpSocket->close();
+//    localSocket->close();
+//    localServer->close();
+//    tcpSocket->close();
 }
 
 void SocketHandler::on_tcpSocket_connected()
@@ -87,10 +97,10 @@ void SocketHandler::on_tcpSocket_connected()
 void SocketHandler::on_tcpSocket_readyRead()
 {
     QByteArray data = tcpSocket->readAll();
-    qDebug() << data;
+    qDebug() << "tcpSocket state: " << tcpSocket->state();
+    qDebug() << "tcpSocket data: " << data;
     emit info(QString(data));
-
-    localSocket->write(data);
+    localSocket->write("123");
     if(localSocket->flush())
     {
         qDebug() << "tcpsocket to localsocket success";
@@ -111,14 +121,15 @@ void SocketHandler::writeToTcpClient(const QJsonObject &json)
 
 void SocketHandler::on_tcpSocket_disconnected()
 {
+    qDebug() << " tcpsocket disconnected";
     if(process && process->state() != QProcess::NotRunning)
     {
         process->kill();
         process->deleteLater();
     }
-    localSocket->deleteLater();
-    localServer->deleteLater();
-    tcpSocket->deleteLater();
+//    localSocket->deleteLater();
+//    localServer->deleteLater();
+//    tcpSocket->deleteLater();
 }
 
 void SocketHandler::start()
@@ -127,7 +138,12 @@ void SocketHandler::start()
     {
         if(tcpSocket->state() == QAbstractSocket::UnconnectedState || tcpSocket->waitForDisconnected(1000))
         {
+            qDebug() << "break .....  ";
             break;
+        }
+        else
+        {
+            qDebug() << "continue ....  ";
         }
     }
 }

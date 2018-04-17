@@ -31,14 +31,16 @@ SOURCES += \
     tcpserver.cpp \
     releasemainwindow.cpp \
     sockethandler.cpp \
-    configutil.cpp
+    configutil.cpp \
+    socketthread.cpp
 
 HEADERS += \
         mainwindow.h \
     tcpserver.h \
     releasemainwindow.h \
     sockethandler.h \
-    configutil.h
+    configutil.h \
+    socketthread.h
 
 FORMS += \
         mainwindow.ui \

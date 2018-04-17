@@ -1,6 +1,7 @@
 #include <QThread>
 #include "tcpserver.h"
 #include "sockethandler.h"
+#include "socketthread.h"
 
 TcpServer::TcpServer(QObject *parent) : QTcpServer(parent)
 {
@@ -9,13 +10,17 @@ TcpServer::TcpServer(QObject *parent) : QTcpServer(parent)
 
 void TcpServer::incomingConnection(qintptr socketDescriptor)
 {
-    SocketHandler * handler = new SocketHandler(0, socketDescriptor);
-    connect(handler, &SocketHandler::info, this, &TcpServer::on_SocketHandler_info);
-    connect(handler, &SocketHandler::error, this, &TcpServer::on_SocketHandler_error);
-    QThread * thread = new QThread(0);
-    handler->moveToThread(thread);
-    connect(thread, &QThread::started, handler, &SocketHandler::start);
-    connect(thread, &QThread::finished, thread, &QThread::deleteLater);
+//    SocketHandler * handler = new SocketHandler(0, socketDescriptor);
+//    connect(handler, &SocketHandler::info, this, &TcpServer::on_SocketHandler_info);
+//    connect(handler, &SocketHandler::error, this, &TcpServer::on_SocketHandler_error);
+//    QThread * thread = new QThread(0);
+//    handler->moveToThread(thread);
+//    connect(thread, &QThread::started, handler, &SocketHandler::start);
+//    connect(thread, &QThread::finished, thread, &QThread::deleteLater);
+//    thread->start();
+    SocketThread * thread = new SocketThread(socketDescriptor, this);
+    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+
     thread->start();
 }
 
