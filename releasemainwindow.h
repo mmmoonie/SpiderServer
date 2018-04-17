@@ -18,13 +18,8 @@ public:
     ~ReleaseMainWindow();
 
 private slots:
-    void on_pushButton_clicked();
-
-    void on_pushButtonClearReq_clicked();
-
-    void on_pushButtonClearRes_clicked();
-
     void on_pushButtonStart_clicked();
+    void on_pushButtonClear_clicked();
 
 private:
     Ui::ReleaseMainWindow *ui;

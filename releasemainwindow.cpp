@@ -8,6 +8,12 @@ ReleaseMainWindow::ReleaseMainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     tcpServer = new TcpServer(this);
+    connect(tcpServer, &TcpServer::info, [=](const QString &msg){
+        ui->textEditLog->append(msg);
+    });
+    connect(tcpServer, &TcpServer::error, [=](const QString &msg){
+        ui->textEditLog->append(msg);
+    });
     statusLabel = new QLabel(this);
     statusLabel->setText("waitting for start");
     this->statusBar()->addWidget(statusLabel);
@@ -16,16 +22,6 @@ ReleaseMainWindow::ReleaseMainWindow(QWidget *parent) :
 ReleaseMainWindow::~ReleaseMainWindow()
 {
     delete ui;
-}
-
-void ReleaseMainWindow::on_pushButtonClearReq_clicked()
-{
-    ui->plainTextEditReq->clear();
-}
-
-void ReleaseMainWindow::on_pushButtonClearRes_clicked()
-{
-    ui->plainTextEditRes->clear();
 }
 
 void ReleaseMainWindow::on_pushButtonStart_clicked()
@@ -50,4 +46,9 @@ void ReleaseMainWindow::on_pushButtonStart_clicked()
         ui->pushButtonStart->setText("start");
         statusLabel->setText("waitting for start");
     }
+}
+
+void ReleaseMainWindow::on_pushButtonClear_clicked()
+{
+    ui->textEditLog->clear();
 }

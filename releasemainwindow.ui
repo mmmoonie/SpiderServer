@@ -15,20 +15,6 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0">
-     <widget class="QLineEdit" name="lineEditPort">
-      <property name="text">
-       <string>7100</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="1">
-     <widget class="QPushButton" name="pushButtonStart">
-      <property name="text">
-       <string>start</string>
-      </property>
-     </widget>
-    </item>
     <item row="0" column="2">
      <spacer name="horizontalSpacer">
       <property name="orientation">
@@ -42,25 +28,29 @@
       </property>
      </spacer>
     </item>
-    <item row="1" column="0" colspan="3">
-     <widget class="QPlainTextEdit" name="plainTextEditReq"/>
+    <item row="0" column="1">
+     <widget class="QPushButton" name="pushButtonStart">
+      <property name="text">
+       <string>start</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QLineEdit" name="lineEditPort">
+      <property name="text">
+       <string>7100</string>
+      </property>
+     </widget>
     </item>
     <item row="2" column="0" colspan="3">
-     <widget class="QPushButton" name="pushButtonClearReq">
+     <widget class="QPushButton" name="pushButtonClear">
       <property name="text">
        <string>clear</string>
       </property>
      </widget>
     </item>
-    <item row="3" column="0" colspan="3">
-     <widget class="QPlainTextEdit" name="plainTextEditRes"/>
-    </item>
-    <item row="4" column="0" colspan="3">
-     <widget class="QPushButton" name="pushButtonClearRes">
-      <property name="text">
-       <string>clear</string>
-      </property>
-     </widget>
+    <item row="1" column="0" colspan="3">
+     <widget class="QTextEdit" name="textEditLog"/>
     </item>
    </layout>
   </widget>

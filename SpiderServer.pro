@@ -6,6 +6,8 @@
 
 QT       += core gui network
 
+CONFIG   += C++11
+
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = SpiderServer
@@ -26,16 +28,21 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    socketthread.cpp \
     tcpserver.cpp \
-    releasemainwindow.cpp
+    releasemainwindow.cpp \
+    sockethandler.cpp \
+    configutil.cpp
 
 HEADERS += \
         mainwindow.h \
-    socketthread.h \
     tcpserver.h \
-    releasemainwindow.h
+    releasemainwindow.h \
+    sockethandler.h \
+    configutil.h
 
 FORMS += \
         mainwindow.ui \
     releasemainwindow.ui
+
+DISTFILES += \
+    etc/SpiderServer.ini
