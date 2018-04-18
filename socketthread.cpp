@@ -68,8 +68,8 @@ void SocketThread::on_tcpSocket_readyRead()
     qDebug() << socketDescriptor << " Data in: " << Data;
 
     localSocket->write(Data);
-    localSocket->flush();
-    localSocket->waitForReadyRead();
+//    localSocket->flush();
+//    localSocket->waitForReadyRead();
 }
 
 void SocketThread::on_tcpSocket_disconnected()
@@ -98,8 +98,8 @@ void SocketThread::on_localSocket_readyRead()
     tcpSocket->write(data);
     tcpSocket->write("\r\n");
     tcpSocket->write("\r\n");
-    tcpSocket->flush();
-    tcpSocket->waitForBytesWritten();
+//    tcpSocket->flush();
+//    tcpSocket->waitForBytesWritten();
 }
 
 void SocketThread::on_localSocket_disconnected()
