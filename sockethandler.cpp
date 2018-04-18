@@ -28,7 +28,7 @@ SocketHandler::SocketHandler(QObject *parent, qintptr socketDescriptor) : QObjec
         errorJson.insert("desc", errorMsg);
         errorJson.insert("data", QJsonValue::Null);
         writeToTcpClient(errorJson);
-//        tcpSocket->close();
+        tcpSocket->close();
         return;
     }
     QString configFilePath = ConfigUtil::APP_SETTINGS_PATH();
@@ -44,7 +44,7 @@ SocketHandler::SocketHandler(QObject *parent, qintptr socketDescriptor) : QObjec
         errorJson.insert("desc", QString(spiderExePath.append(" not exists")));
         errorJson.insert("data", QJsonValue::Null);
         writeToTcpClient(errorJson);
-//        tcpSocket->close();
+        tcpSocket->close();
         return;
     }
     QStringList arguments;

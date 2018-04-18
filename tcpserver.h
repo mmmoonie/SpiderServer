@@ -11,12 +11,10 @@ public:
     explicit TcpServer(QObject *parent = 0);
 
 signals:
-    void error(const QString &msg);
     void info(const QString &msg);
 
 public slots:
     void on_SocketHandler_info(const QString &msg);
-    void on_SocketHandler_error(const QString &msg);
 
 protected:
     void incomingConnection(qintptr socketDescriptor);

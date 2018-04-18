@@ -11,9 +11,6 @@ ReleaseMainWindow::ReleaseMainWindow(QWidget *parent) :
     connect(tcpServer, &TcpServer::info, [=](const QString &msg){
         ui->textEditLog->append(msg);
     });
-    connect(tcpServer, &TcpServer::error, [=](const QString &msg){
-        ui->textEditLog->append(msg);
-    });
     statusLabel = new QLabel(this);
     statusLabel->setText("waitting for start");
     this->statusBar()->addWidget(statusLabel);

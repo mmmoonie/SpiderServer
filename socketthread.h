@@ -13,11 +13,10 @@ class SocketThread : public QThread
     Q_OBJECT
 public:
     explicit SocketThread(qintptr ID, QObject *parent = 0);
-
     void run();
 
 signals:
-    void error(QTcpSocket::SocketError socketerror);
+    void info(const QString &infoMsg);
 
 public slots:
     void on_tcpSocket_readyRead();
