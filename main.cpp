@@ -5,10 +5,14 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-//    MainWindow w;
-//    w.show();
+
+#ifdef QT_NO_DEBUG
     ReleaseMainWindow w;
     w.show();
+#else
+    MainWindow w;
+    w.show();
+#endif
 
     return a.exec();
 }
