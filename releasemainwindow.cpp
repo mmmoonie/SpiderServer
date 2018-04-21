@@ -1,6 +1,8 @@
 #include "releasemainwindow.h"
 #include "ui_releasemainwindow.h"
 #include <QMessageBox>
+#include <QPalette>
+#include <QDateTime>
 
 ReleaseMainWindow::ReleaseMainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -8,8 +10,15 @@ ReleaseMainWindow::ReleaseMainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     tcpServer = new TcpServer(this);
+    ui->plainTextEditLog->setStyleSheet("background-color:black;font-size:16px;");
+    QPalette palette = ui->plainTextEditLog->palette();
+    palette.setColor(QPalette::Active, QPalette::Base, Qt::white);
+    palette.setColor(QPalette::Inactive, QPalette::Base, Qt::white);
+    palette.setColor(QPalette::Text, Qt::white);
+    ui->plainTextEditLog->setPalette(palette);
     connect(tcpServer, &TcpServer::info, [=](const QString &msg){
-        ui->textEditLog->append(msg);
+        ui->plainTextEditLog->appendPlainText(QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss:zzz").append("\t" + msg));
+        ui->plainTextEditLog->appendPlainText("");
     });
     statusLabel = new QLabel(this);
     statusLabel->setText("waitting for start");
@@ -47,5 +56,5 @@ void ReleaseMainWindow::on_pushButtonStart_clicked()
 
 void ReleaseMainWindow::on_pushButtonClear_clicked()
 {
-    ui->textEditLog->clear();
+    ui->plainTextEditLog->clear();
 }

@@ -14,7 +14,6 @@ void SocketThread::run()
 {
     // init tcpSocket
     tcpSocket = new QTcpSocket();
-//    tcpSocket->setSocketOption(QAbstractSocket::SendBufferSizeSocketOption, QVariant(50000));
     if(!tcpSocket->setSocketDescriptor(this->socketDescriptor))
     {
         emit info(tcpSocket->errorString());
@@ -111,45 +110,15 @@ void SocketThread::on_localServer_newConnection()
 void SocketThread::on_localSocket_readyRead()
 {
     QByteArray data = localSocket->readAll();
+    emit info(QString(data));
     int count = data.count();
-    qDebug() << "data from local socket count is: " << count;
-    if(count > 2048) {
-        int start = 0;
-        while(1) {
-            int end = start + 2048;
-            if(end < count )
-            {
-                qDebug() << "end < count : " << end;
-                QByteArray array = data.mid(start, end);
-                start = end;
-                tcpSocket->write(array);
-                tcpSocket->write("\r\n");
-                tcpSocket->flush();
-                tcpSocket->waitForBytesWritten();
-            }
-            else
-            {
-                qDebug() << "end >= count : " << end;
-                QByteArray array = data.mid(start, count - 1);
-                tcpSocket->write(array);
-                tcpSocket->write("\r\n");
-                tcpSocket->flush();
-                tcpSocket->waitForBytesWritten();
-                break;
-            }
-        }
-    }
-    else
+    tcpSocket->write(data);
+    tcpSocket->write("\r\n");
+    if(count != 4096)
     {
-        tcpSocket->write(data);
+        tcpSocket->write("boundary-----------");
     }
-
-
     tcpSocket->write("\r\n");
-    tcpSocket->write("boundary-----------");
-    tcpSocket->write("\r\n");
-    tcpSocket->flush();
-    tcpSocket->waitForBytesWritten();
 }
 
 void SocketThread::on_localSocket_disconnected()
