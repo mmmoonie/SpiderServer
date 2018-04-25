@@ -10,12 +10,6 @@ class TcpServer : public QTcpServer
 public:
     explicit TcpServer(QObject *parent = 0);
 
-signals:
-    void info(const QString &msg);
-
-public slots:
-    void on_SocketHandler_info(const QString msg);
-
 protected:
     void incomingConnection(qintptr socketDescriptor);
 };

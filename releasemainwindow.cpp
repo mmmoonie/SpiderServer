@@ -16,12 +16,6 @@ ReleaseMainWindow::ReleaseMainWindow(QWidget *parent) :
     palette.setColor(QPalette::Inactive, QPalette::Base, Qt::white);
     palette.setColor(QPalette::Text, Qt::white);
     ui->plainTextEditLog->setPalette(palette);
-    connect(tcpServer, &TcpServer::info, [=](const QString &msg){
-        QString info = QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss:zzz").append("\t" + msg);
-        qDebug() << info;
-        ui->plainTextEditLog->appendPlainText(info);
-        ui->plainTextEditLog->appendPlainText("");
-    });
     statusLabel = new QLabel(this);
     statusLabel->setText("waitting for start");
     this->statusBar()->addWidget(statusLabel);

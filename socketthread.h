@@ -22,9 +22,6 @@ public:
     void run();
     ~SocketThread();
 
-signals:
-    void info(const QString infoMsg);
-
 public slots:
     void on_tcpSocket_readyRead();
     void on_tcpSocket_disconnected();
@@ -40,6 +37,7 @@ private:
     QProcess process;
     QLocalServer localServer;
     QLocalSocket * localSocket = 0;
+    bool firstRequest;
     void writeToTcpClient(const QJsonObject &json);
 };
 
