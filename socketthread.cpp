@@ -5,29 +5,97 @@
 #include <QSettings>
 #include <QFileInfo>
 
-SocketThread::SocketThread(qintptr ID, QObject *parent) : QThread(parent)
+SocketThread::SocketThread(QObject *parent) : QThread(parent)
 {
-    this->socketDescriptor = ID;
+    tcpSocket = new QTcpSocket();
+    moveToThread(this);
+    tcpSocket->moveToThread(this);
+    connect(tcpSocket, &QTcpSocket::readyRead, this, &SocketThread::on_tcpSocket_readyRead);
+    connect(tcpSocket, &QTcpSocket::disconnected, this, &SocketThread::on_tcpSocket_disconnected);
+
+    localServer.moveToThread(this);
+    connect(&localServer, &QLocalServer::newConnection, this, &SocketThread::on_localServer_newConnection);
+//    QString uuid = QUuid::createUuid().toString();
+//    if(!localServer.listen(uuid))
+//    {
+//        QString errorMsg = QString("local server listen on %1 failed").arg(uuid);
+//        emit info(errorMsg);
+//        QJsonObject errorJson;
+//        errorJson.insert("code", 500);
+//        errorJson.insert("desc", errorMsg);
+//        errorJson.insert("data", QJsonValue::Null);
+//        writeToTcpClient(errorJson);
+//        tcpSocket->close();
+//        return;
+//    }
+//    emit info("localServer is listening on " + uuid);
+
+    // search config file
+    // get the WebVewSpider.exe path and start the process
+//    QString configFilePath = ConfigUtil::APP_SETTINGS_PATH();
+//    if(!configFilePath.isNull() && !configFilePath.isEmpty())
+//    {
+//        emit info(QString("useing config file : ").append(configFilePath));
+//        QSettings * defaultSettings = new QSettings(configFilePath, QSettings::IniFormat);
+//        defaultSettings->beginGroup("default");
+//        QString spiderExePath = defaultSettings->value("spiderExePath").toString();
+//        QFileInfo fileInfo(spiderExePath);
+//        if(!fileInfo.exists())
+//        {
+//            emit info(spiderExePath + " not exists");
+//            QJsonObject errorJson;
+//            errorJson.insert("code", 500);
+//            errorJson.insert("desc", spiderExePath + " not exists");
+//            errorJson.insert("data", QJsonValue::Null);
+//            writeToTcpClient(errorJson);
+//            tcpSocket->close();
+//            return;
+//        }
+//        QStringList arguments;
+//        arguments << uuid;
+//        process.moveToThread(this);
+//        process.start(spiderExePath, arguments);
+//        process.waitForStarted();
+//        emit info(spiderExePath + " started");
+//        localServer.waitForNewConnection(10000);
+//    }
+//    else
+//    {
+//        emit info("config file not found");
+//        return;
+//    }
+    this->start();
 }
 
 void SocketThread::run()
 {
-    // init tcpSocket
-    tcpSocket = new QTcpSocket();
-    if(!tcpSocket->setSocketDescriptor(this->socketDescriptor))
+    try
     {
-        emit info(tcpSocket->errorString());
-        return;
+        exec();
     }
-    connect(tcpSocket, &QTcpSocket::readyRead, this, &SocketThread::on_tcpSocket_readyRead, Qt::DirectConnection);
-    connect(tcpSocket, &QTcpSocket::disconnected, this, &SocketThread::on_tcpSocket_disconnected);
+    catch (...)
+    {
+        qCritical("HttpConnectionHandler (%p): an uncatched exception occured in the thread",this);
+    }
+    tcpSocket->close();
+    delete tcpSocket;
+}
 
-    // init localServer
-    // listen on uuid
-    localServer = new QLocalServer();
-    connect(localServer, &QLocalServer::newConnection, this, &SocketThread::on_localServer_newConnection);
+SocketThread::~SocketThread()
+{
+    quit();
+    wait();
+}
+
+void SocketThread::handleConnection(tSocketDescriptor id)
+{
+    tcpSocket->setSocketDescriptor(id);
+}
+
+void SocketThread::on_tcpSocket_readyRead()
+{
     QString uuid = QUuid::createUuid().toString();
-    if(!localServer->listen(uuid))
+    if(!localServer.listen(uuid))
     {
         QString errorMsg = QString("local server listen on %1 failed").arg(uuid);
         emit info(errorMsg);
@@ -39,10 +107,6 @@ void SocketThread::run()
         tcpSocket->close();
         return;
     }
-    emit info("localServer is listening on " + uuid);
-
-    // search config file
-    // get the WebVewSpider.exe path and start the process
     QString configFilePath = ConfigUtil::APP_SETTINGS_PATH();
     if(!configFilePath.isNull() && !configFilePath.isEmpty())
     {
@@ -64,23 +128,17 @@ void SocketThread::run()
         }
         QStringList arguments;
         arguments << uuid;
-        process = new QProcess();
-        process->start(spiderExePath, arguments);
-        process->waitForStarted();
+//        process.moveToThread(this);
+        process.start(spiderExePath, arguments);
+        process.waitForStarted();
         emit info(spiderExePath + " started");
-        localServer->waitForNewConnection(10000);
+        localServer.waitForNewConnection(10000);
     }
     else
     {
         emit info("config file not found");
         return;
     }
-
-    exec();
-}
-
-void SocketThread::on_tcpSocket_readyRead()
-{
     QByteArray data = tcpSocket->readAll();
     emit info(QString::number(socketDescriptor) + " tcpsocket data in: " + data);
     localSocket->write(data);
@@ -88,21 +146,23 @@ void SocketThread::on_tcpSocket_readyRead()
 
 void SocketThread::on_tcpSocket_disconnected()
 {
+
+    localSocket->close();
+    localServer.close();
     emit info(QString::number(socketDescriptor) + " tcpsocket disconnected");
-    if(process && process->state() != QProcess::NotRunning)
+    if(process.state() != QProcess::NotRunning)
     {
-        process->kill();
-        emit info(process->program() + " killed");
-        process->deleteLater();
+        process.kill();
+        emit info(process.program() + " killed");
     }
-    tcpSocket->deleteLater();
+    tcpSocket->close();
     exit(0);
 }
 
 void SocketThread::on_localServer_newConnection()
 {
-    localSocket = localServer->nextPendingConnection();
-    emit info(localServer->serverName() + " has new connection");
+    localSocket = localServer.nextPendingConnection();
+    emit info(localServer.serverName() + " has new connection");
     connect(localSocket, &QLocalSocket::readyRead, this, &SocketThread::on_localSocket_readyRead, Qt::DirectConnection);
     connect(localSocket, &QLocalSocket::disconnected, this, &SocketThread::on_localSocket_disconnected);
 }
@@ -124,8 +184,6 @@ void SocketThread::on_localSocket_readyRead()
 void SocketThread::on_localSocket_disconnected()
 {
     emit(localSocket->socketDescriptor() + " disconnected");
-    localSocket->deleteLater();
-    localServer->deleteLater();
 }
 
 

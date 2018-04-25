@@ -5,18 +5,21 @@
 
 TcpServer::TcpServer(QObject *parent) : QTcpServer(parent)
 {
-
+    qRegisterMetaType<tSocketDescriptor>("tSocketDescriptor");
 }
 
 void TcpServer::incomingConnection(qintptr socketDescriptor)
 {
-    SocketThread * thread = new SocketThread(socketDescriptor, this);
-    connect(thread, &SocketThread::finished, thread, &SocketThread::deleteLater);
-    connect(thread, &SocketThread::info, this, &TcpServer::on_SocketHandler_info);
-    thread->start();
+    SocketThread * thread = new SocketThread(nullptr);
+//    connect(thread, &SocketThread::finished, thread, &SocketThread::deleteLater);
+////    connect(thread, &SocketThread::info, this, &TcpServer::on_SocketHandler_info);
+//    thread->start();
+
+    QMetaObject::invokeMethod(thread, "handleConnection", Qt::QueuedConnection, Q_ARG(tSocketDescriptor, socketDescriptor));
 }
 
-void TcpServer::on_SocketHandler_info(const QString &msg)
+void TcpServer::on_SocketHandler_info(const QString msg)
 {
-    emit info(msg);
+    qDebug() << msg;
+//    emit info(msg);
 }

@@ -14,7 +14,7 @@ signals:
     void info(const QString &msg);
 
 public slots:
-    void on_SocketHandler_info(const QString &msg);
+    void on_SocketHandler_info(const QString msg);
 
 protected:
     void incomingConnection(qintptr socketDescriptor);

@@ -8,15 +8,22 @@
 #include <QLocalSocket>
 #include <QJsonObject>
 
+#if QT_VERSION >= 0x050000
+    typedef qintptr tSocketDescriptor;
+#else
+    typedef int tSocketDescriptor;
+#endif
+
 class SocketThread : public QThread
 {
     Q_OBJECT
 public:
-    explicit SocketThread(qintptr ID, QObject *parent = 0);
+    explicit SocketThread(QObject *parent = 0);
     void run();
+    ~SocketThread();
 
 signals:
-    void info(const QString &infoMsg);
+    void info(const QString infoMsg);
 
 public slots:
     void on_tcpSocket_readyRead();
@@ -24,13 +31,14 @@ public slots:
     void on_localServer_newConnection();
     void on_localSocket_readyRead();
     void on_localSocket_disconnected();
+    void handleConnection(tSocketDescriptor id);
 
 
 private:
     QTcpSocket * tcpSocket = 0;
     qintptr socketDescriptor;
-    QProcess * process = 0;
-    QLocalServer * localServer = 0;
+    QProcess process;
+    QLocalServer localServer;
     QLocalSocket * localSocket = 0;
     void writeToTcpClient(const QJsonObject &json);
 };
