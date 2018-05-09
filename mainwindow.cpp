@@ -9,8 +9,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    localServer = new QLocalServer(this);
-    connect(localServer, &QLocalServer::newConnection, this, &MainWindow::on_localServer_newConnection);
+    tcpServer = new QTcpServer(this);
+    connect(tcpServer, &QTcpServer::newConnection, this, &MainWindow::on_tcpServer_newConnection);
     statusLabel = new QLabel(this);
     statusLabel->setText("waitting for start");
     this->statusBar()->addWidget(statusLabel);
@@ -26,10 +26,10 @@ void MainWindow::on_pushButtonStart_clicked()
     QString status = ui->pushButtonStart->text();
     if(status == "start")
     {
-        QString serverName = ui->lineEditPort->text();
-        if(!localServer->listen(serverName))
+        int port = ui->lineEditPort->text().toInt();
+        if(!tcpServer->listen(QHostAddress::Any, port))
         {
-            QMessageBox::warning(this, "warn", QString("can't listen on ").append(serverName));
+            QMessageBox::warning(this, "warn", QString("can't listen on ").append(port));
         }
         else
         {
@@ -41,7 +41,7 @@ void MainWindow::on_pushButtonStart_clicked()
     }
     else
     {
-        localServer->close();
+        tcpServer->close();
         ui->pushButtonStart->setText("start");
         statusLabel->setText("waitting for start");
         ui->pushButtonSend->setEnabled(false);
@@ -49,17 +49,17 @@ void MainWindow::on_pushButtonStart_clicked()
 
 }
 
-void MainWindow::on_localServer_newConnection()
+void MainWindow::on_tcpServer_newConnection()
 {
-    localSocket = localServer->nextPendingConnection();
-    connect(localSocket, &QLocalSocket::readyRead, this, &MainWindow::on_localSocket_readyRead);
-    connect(localSocket, &QLocalSocket::aboutToClose, this, &MainWindow::on_localSocket_aboutToClose);
+    tcpSocket = tcpServer->nextPendingConnection();
+    connect(tcpSocket, &QTcpSocket::readyRead, this, &MainWindow::on_tcpSocket_readyRead);
+    connect(tcpSocket, &QTcpSocket::aboutToClose, this, &MainWindow::on_tcpSocket_aboutToClose);
     ui->pushButtonSend->setEnabled(true);
 }
 
-void MainWindow::on_localSocket_readyRead()
+void MainWindow::on_tcpSocket_readyRead()
 {
-    QByteArray data = localSocket->readAll();
+    QByteArray data = tcpSocket->readAll();
     qDebug() << data;
     QJsonParseError * parseError = new QJsonParseError;
     QJsonDocument jsonDoc = QJsonDocument::fromJson(data, parseError);
@@ -71,10 +71,10 @@ void MainWindow::on_localSocket_readyRead()
     ui->textEditReceive->setText(jsonDoc.toJson());
 }
 
-void MainWindow::on_localSocket_aboutToClose()
+void MainWindow::on_tcpSocket_aboutToClose()
 {
-    localSocket->close();
-    delete localSocket;
+    tcpSocket->close();
+    delete tcpSocket;
     ui->pushButtonSend->setEnabled(false);
 }
 
@@ -87,9 +87,9 @@ void MainWindow::on_pushButtonSend_clicked()
     }
     else
     {
-        localSocket->write(data.toUtf8());
-        localSocket->flush();
-        localSocket->waitForBytesWritten();
+        tcpSocket->write(data.toUtf8());
+        tcpSocket->flush();
+        tcpSocket->waitForBytesWritten();
     }
 }
 

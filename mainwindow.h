@@ -2,8 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QLocalServer>
-#include <QLocalSocket>
+#include <QTcpServer>
+#include <QTcpSocket>
 #include <QLabel>
 #include "tcpserver.h"
 
@@ -18,9 +18,9 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    void on_localServer_newConnection();
-    void on_localSocket_readyRead();
-    void on_localSocket_aboutToClose();
+    void on_tcpServer_newConnection();
+    void on_tcpSocket_readyRead();
+    void on_tcpSocket_aboutToClose();
 
 public slots:
     void on_pushButtonStart_clicked();
@@ -33,8 +33,8 @@ private slots:
 private:
     Ui::MainWindow *ui;
     QLabel * statusLabel;
-    QLocalServer * localServer;
-    QLocalSocket * localSocket;
+    QTcpServer * tcpServer;
+    QTcpSocket * tcpSocket;
 };
 
 #endif // MAINWINDOW_H
